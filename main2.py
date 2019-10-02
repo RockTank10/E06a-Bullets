@@ -57,6 +57,13 @@ class Enemy(arcade.Sprite):
         self.hp = ENEMY_HP
         (self.center_x, self.center_y) = position
 
+class Explosion(arcade.Sprite):
+    def __init__(self, position):
+        '''
+        initiazes dead penguin
+        '''
+        super().__init__("PNG/Explosion/explosion00.png", 0.25)
+        (self.center_x, self.center_y) = position
 
         
 
@@ -74,6 +81,7 @@ class Window(arcade.Window):
         self.enemy_list = arcade.SpriteList()
         self.player = Player()
         self.score = 0
+        self.explosion_list = arcade.SpriteList()
 
     def setup(self):
         '''
@@ -91,11 +99,24 @@ class Window(arcade.Window):
                 if arcade.check_for_collision_with_list(e,self.bullet_list):
                     e.hp =e.hp - BULLET_DAMAGE
                     self.score=self.score+HIT_SCORE
+                    x=e.center_x
+                    y=e.center_y - 40
+                    bullet_enemy=Bullet((x,y),(0,-10),BULLET_DAMAGE)
+                    self.bullet_list.append(bullet_enemy)
+                    for a in self.bullet_list:
+                        a.kill()
+                if arcade.check_for_collision_with_list(self.player,self.bullet_list):
                     for a in self.bullet_list:
                         a.kill()
                 if e.hp==0:
                     self.score=self.score+KILL_SCORE
+                    x=e.center_x
+                    y=e.center_y
+                    explosion=Explosion((x,y))
+                    self.explosion_list.append(explosion)
                     e.kill()
+                    
+                    
                 if self.score == 1000:
                     self.close()
                 
@@ -105,6 +126,7 @@ class Window(arcade.Window):
         self.player.draw()
         self.bullet_list.draw()
         self.enemy_list.draw()
+        self.explosion_list.draw()
 
     def on_mouse_motion(self, x, y, dx, dy):
         '''
@@ -115,7 +137,7 @@ class Window(arcade.Window):
     def on_mouse_press(self, x, y, button, modifiers):
         if button == arcade.MOUSE_BUTTON_LEFT:
             x = self.player.center_x
-            y = self.player.center_y + 15
+            y = self.player.center_y + 40
             bullet = Bullet((x,y),(0,10),BULLET_DAMAGE)
             self.bullet_list.append(bullet)
             
